@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grid</title>
+    <style>
+      .content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .content div {
+        background-color: skyblue;
+        border: 1px solid black;
+        padding: 30px;
+      }
+
+      /* Laptop */
+      @media (min-width: 769px) {
+        .content {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <!-- left -->
+      <div>
+        <h1>
+          Raih karir dan keahlian digital dengan peluang kerja tanpa batas
+        </h1>
+        <p>
+          Purwadhika dipercaya sejak 1987 dan telah menyalurkan lebih dari
+          30.000 talenta digital berkualitas ke 1.000+ hiring partner Purwadhika
+          di seluruh dunia
+        </p>
+      </div>
+
+      <!-- right -->
+      <div>
+        <img src="picture.avif" alt="thumbnail" width="100%" height="400px" />
+      </div>
+    </div>
+  </body>
+</html>

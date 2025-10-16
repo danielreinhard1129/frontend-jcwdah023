@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Media Query</title>
+    <style>
+      /* Mobile */
+      .container {
+        background-color: antiquewhite;
+        text-align: center;
+        padding: 20px;
+      }
+
+      /* Tablet */
+      @media (min-width: 481px) and (max-width: 768px) {
+        .container {
+          background-color: aquamarine;
+        }
+      }
+
+      /* Laptop */
+      @media (min-width: 769px) {
+        .container {
+          background-color: blueviolet;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Responsive Media Query</h1>
+    </div>
+  </body>
+</html>
