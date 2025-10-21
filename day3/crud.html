@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <!-- Input untuk tambah data -->
+    <input type="text" id="inputParagraf" />
+    <button onclick="addParagraf()">Save</button>
+
+    <!-- Tempat untuk menampilkan data -->
+    <div id="container"></div>
+
+    <script>
+      function addParagraf() {
+        const input = document.getElementById("inputParagraf");
+        const container = document.getElementById("container");
+
+        // cek dulu input si usernya itu kosong atau tidak
+        if (input.value.trim() === "") {
+          alert("Input tidak boleh kosong!");
+          return;
+        }
+
+        // buat element p baru
+        const newParagraf = document.createElement("p");
+        newParagraf.innerText = input.value;
+
+        // tambahkan paragraf ke container
+        container.appendChild(newParagraf);
+
+        // kosongkan input
+        input.value = "";
+      }
+    </script>
+  </body>
+</html>

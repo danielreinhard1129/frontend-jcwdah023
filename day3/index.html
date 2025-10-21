@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Javascript DOM</title>
+  </head>
+  <body>
+    <h1 id="myElement">Original Text</h1>
+    <button onclick="updateText()">Update Text</button>
+
+    <script>
+      function updateText() {
+        const elemen = document.getElementById("myElement");
+        elemen.innerText = "Updated Text";
+      }
+    </script>
+  </body>
+</html>
