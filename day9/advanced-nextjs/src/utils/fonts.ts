@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Oswald } from "next/font/google";
+import { Geist, Geist_Mono, Oswald, } from "next/font/google";
 
 export const geistSans = Geist({
   variable: "--font-geist-sans",
