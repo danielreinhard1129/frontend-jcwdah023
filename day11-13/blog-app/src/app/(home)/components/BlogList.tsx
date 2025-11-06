@@ -12,7 +12,7 @@ const BlogList = () => {
   const getBlogs = async () => {
     try {
       const result = await axios.get(
-        "https://betterkiss-us.backendless.app/api/data/Blogs",
+        "https://betterkiss-us.backendless.app/api/data/Blogs?sortBy=%60created%60%20desc",
       );
       setBlogs(result.data);
     } catch (error) {

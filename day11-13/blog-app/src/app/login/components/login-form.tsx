@@ -1,7 +1,14 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
@@ -10,32 +17,33 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import axios from "axios";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/stores/auth";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  name: z.string().min(5, "Name must be at least 5 characters."),
   email: z.email(),
   password: z.string().min(5, "Password must be at least 5 characters."),
 });
 
-export function SignupForm({
+export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+
+  const { onAuthSuccess } = useAuth();
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
       email: "",
       password: "",
     },
@@ -44,19 +52,27 @@ export function SignupForm({
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      await axios.post(
-        "https://betterkiss-us.backendless.app/api/users/register",
+      const result = await axios.post(
+        "https://betterkiss-us.backendless.app/api/users/login",
         {
-          email: data.email,
+          login: data.email,
           password: data.password,
-          name: data.name,
         },
       );
 
-      toast.success("Register success");
-      router.push("/login");
+      onAuthSuccess({
+        user: {
+          email: result.data.email,
+          objectId: result.data.objectId,
+          userToken: result.data["user-token"],
+        },
+      });
+
+      toast.success("Login success");
+
+      router.push("/");
     } catch (error) {
-      toast.error("Register Failed");
+      toast.error("Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -64,40 +80,16 @@ export function SignupForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
-        <CardContent className="grid p-0 md:grid-cols-2">
-          <form
-            className="p-6 md:p-8"
-            id="form-register"
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
+      <Card>
+        <CardHeader>
+          <CardTitle>Login to your account</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form id="form-login" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
-              <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Create your account</h1>
-                <p className="text-muted-foreground text-sm text-balance">
-                  Enter your email below to create your account
-                </p>
-              </div>
-
-              <Controller
-                name="name"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="name">Name</FieldLabel>
-                    <Input
-                      {...field}
-                      id="name"
-                      aria-invalid={fieldState.invalid}
-                      placeholder="Your name"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
               <Controller
                 name="email"
                 control={form.control}
@@ -139,23 +131,16 @@ export function SignupForm({
               />
 
               <Field>
-                <Button type="submit" form="form-register" disabled={isLoading}>
-                  {isLoading ? "Loading" : "Create Account"}
+                <Button type="submit" form="form-login" disabled={isLoading}>
+                  {isLoading ? "Loading" : "Login"}
                 </Button>
-              </Field>
 
-              <FieldDescription className="text-center">
-                Already have an account? <a href="#">Sign in</a>
-              </FieldDescription>
+                <FieldDescription className="text-center">
+                  Don&apos;t have an account? <a href="#">Sign up</a>
+                </FieldDescription>
+              </Field>
             </FieldGroup>
           </form>
-          <div className="bg-muted relative hidden md:block">
-            <img
-              src="/thumbnail.avif"
-              alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-            />
-          </div>
         </CardContent>
       </Card>
     </div>
