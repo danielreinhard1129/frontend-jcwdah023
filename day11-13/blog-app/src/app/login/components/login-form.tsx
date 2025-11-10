@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,14 +16,15 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { z } from "zod";
+import { axiosInstance } from "@/lib/axios";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import axios from "axios";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useAuth } from "@/stores/auth";
+import { useMutation } from "@tanstack/react-query";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const formSchema = z.object({
   email: z.email(),
@@ -37,10 +37,6 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const router = useRouter();
 
-  const { onAuthSuccess } = useAuth();
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,33 +45,33 @@ export function LoginForm({
     },
   });
 
-  async function onSubmit(data: z.infer<typeof formSchema>) {
-    try {
-      setIsLoading(true);
-      const result = await axios.post(
-        "https://betterkiss-us.backendless.app/api/users/login",
-        {
-          login: data.email,
-          password: data.password,
-        },
-      );
+  const { mutateAsync: login, isPending } = useMutation({
+    mutationFn: async (data: z.infer<typeof formSchema>) => {
+      const result = await axiosInstance.post("/api/users/login", {
+        login: data.email,
+        password: data.password,
+      });
 
-      onAuthSuccess({
-        user: {
-          email: result.data.email,
-          objectId: result.data.objectId,
-          userToken: result.data["user-token"],
-        },
+      return result.data;
+    },
+    onSuccess: async (result) => {
+      await signIn("credentials", {
+        email: result.email,
+        objectId: result.objectId,
+        userToken: result["user-token"],
+        redirect: false,
       });
 
       toast.success("Login success");
-
       router.push("/");
-    } catch (error) {
+    },
+    onError: () => {
       toast.error("Login failed");
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  });
+
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    await login(data);
   }
 
   return (
@@ -131,8 +127,8 @@ export function LoginForm({
               />
 
               <Field>
-                <Button type="submit" form="form-login" disabled={isLoading}>
-                  {isLoading ? "Loading" : "Login"}
+                <Button type="submit" form="form-login" disabled={isPending}>
+                  {isPending ? "Loading" : "Login"}
                 </Button>
 
                 <FieldDescription className="text-center">

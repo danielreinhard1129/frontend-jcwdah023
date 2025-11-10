@@ -10,14 +10,14 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { axiosInstance } from "@/lib/axios";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
 import { toast } from "sonner";
+import { z } from "zod";
 
 const formSchema = z.object({
   name: z.string().min(5, "Name must be at least 5 characters."),
@@ -30,7 +30,6 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,25 +40,26 @@ export function SignupForm({
     },
   });
 
-  async function onSubmit(data: z.infer<typeof formSchema>) {
-    try {
-      setIsLoading(true);
-      await axios.post(
-        "https://betterkiss-us.backendless.app/api/users/register",
-        {
-          email: data.email,
-          password: data.password,
-          name: data.name,
-        },
-      );
-
+  const { mutateAsync: register, isPending } = useMutation({
+    mutationFn: async (data: z.infer<typeof formSchema>) => {
+      const result = await axiosInstance.post("/api/users/register", {
+        email: data.email,
+        password: data.password,
+        name: data.name,
+      });
+      return result.data;
+    },
+    onSuccess: () => {
       toast.success("Register success");
       router.push("/login");
-    } catch (error) {
+    },
+    onError: () => {
       toast.error("Register Failed");
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  });
+
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    await register(data);
   }
 
   return (
@@ -139,8 +139,8 @@ export function SignupForm({
               />
 
               <Field>
-                <Button type="submit" form="form-register" disabled={isLoading}>
-                  {isLoading ? "Loading" : "Create Account"}
+                <Button type="submit" form="form-register" disabled={isPending}>
+                  {isPending ? "Loading" : "Create Account"}
                 </Button>
               </Field>
 

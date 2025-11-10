@@ -1,11 +1,11 @@
 "use client";
 
-import { useAuth } from "@/stores/auth";
-import { Button } from "./ui/button";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { Button } from "./ui/button";
 
 const Navbar = () => {
-  const { user, clearAuth } = useAuth();
+  const session = useSession();
 
   return (
     <div className="container mx-auto flex items-center justify-between p-4">
@@ -15,12 +15,12 @@ const Navbar = () => {
         <Link href="/">Blog</Link>
         <Link href="/write">Write</Link>
 
-        {!user ? (
+        {session.status === "unauthenticated" ? (
           <Link href="/login">
             <Button>Sign In</Button>
           </Link>
         ) : (
-          <Button variant="destructive" onClick={clearAuth}>
+          <Button variant="destructive" onClick={() => signOut()}>
             Sign Out
           </Button>
         )}
